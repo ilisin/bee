@@ -68,7 +68,11 @@ const (
 // ColorLog colors log and print to stdout.
 // See color rules in function 'ColorLogS'.
 func ColorLog(format string, a ...interface{}) {
-	fmt.Print(ColorLogS(format, a...))
+	if goos := runtime.GOOS; goos == "windows" {
+		ConsoleOutWithLinuxFmt(ColorLogS(format, a...))
+	} else {
+		fmt.Print(ColorLogS(format, a...))
+	}
 }
 
 // ColorLogS colors log and return colored content.
@@ -85,52 +89,52 @@ func ColorLogS(format string, a ...interface{}) string {
 
 	var clog string
 
-	if runtime.GOOS != "windows" {
-		// Level.
-		i := strings.Index(log, "]")
-		if log[0] == '[' && i > -1 {
-			clog += "[" + getColorLevel(log[1:i]) + "]"
-		}
-
-		log = log[i+1:]
-
-		// Error.
-		log = strings.Replace(log, "[ ", fmt.Sprintf("[\033[%dm", Red), -1)
-		log = strings.Replace(log, " ]", EndColor+"]", -1)
-
-		// Path.
-		log = strings.Replace(log, "( ", fmt.Sprintf("(\033[%dm", Yellow), -1)
-		log = strings.Replace(log, " )", EndColor+")", -1)
-
-		// Highlights.
-		log = strings.Replace(log, "# ", fmt.Sprintf("\033[%dm", Gray), -1)
-		log = strings.Replace(log, " #", EndColor, -1)
-
-		log = clog + log
-
-	} else {
-		// Level.
-		i := strings.Index(log, "]")
-		if log[0] == '[' && i > -1 {
-			clog += "[" + log[1:i] + "]"
-		}
-
-		log = log[i+1:]
-
-		// Error.
-		log = strings.Replace(log, "[ ", "[", -1)
-		log = strings.Replace(log, " ]", "]", -1)
-
-		// Path.
-		log = strings.Replace(log, "( ", "(", -1)
-		log = strings.Replace(log, " )", ")", -1)
-
-		// Highlights.
-		log = strings.Replace(log, "# ", "", -1)
-		log = strings.Replace(log, " #", "", -1)
-
-		log = clog + log
+	//if runtime.GOOS != "windows" {
+	// Level.
+	i := strings.Index(log, "]")
+	if log[0] == '[' && i > -1 {
+		clog += "[" + getColorLevel(log[1:i]) + "]"
 	}
+
+	log = log[i+1:]
+
+	// Error.
+	log = strings.Replace(log, "[ ", fmt.Sprintf("[\033[%dm", Red), -1)
+	log = strings.Replace(log, " ]", EndColor+"]", -1)
+
+	// Path.
+	log = strings.Replace(log, "( ", fmt.Sprintf("(\033[%dm", Yellow), -1)
+	log = strings.Replace(log, " )", EndColor+")", -1)
+
+	// Highlights.
+	log = strings.Replace(log, "# ", fmt.Sprintf("\033[%dm", Gray), -1)
+	log = strings.Replace(log, " #", EndColor, -1)
+
+	log = clog + log
+
+	//	} else {
+	//		// Level.
+	//		i := strings.Index(log, "]")
+	//		if log[0] == '[' && i > -1 {
+	//			clog += "[" + log[1:i] + "]"
+	//		}
+	//
+	//		log = log[i+1:]
+	//
+	//		// Error.
+	//		log = strings.Replace(log, "[ ", "[", -1)
+	//		log = strings.Replace(log, " ]", "]", -1)
+	//
+	//		// Path.
+	//		log = strings.Replace(log, "( ", "(", -1)
+	//		log = strings.Replace(log, " )", ")", -1)
+	//
+	//		// Highlights.
+	//		log = strings.Replace(log, "# ", "", -1)
+	//		log = strings.Replace(log, " #", "", -1)
+	//
+	//		log = clog + log
+	//	}
 
 	return time.Now().Format("2006/01/02 15:04:05 ") + log
 }
